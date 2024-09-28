@@ -95,7 +95,7 @@ public class UserModelService {
         userModel.setCountry(null);
         userModel.setTag(null);
         userModel.setAboutMe(null);
-        userModel.setQuotes("write some thing heare");
+        userModel.setQuotes("Click here to edit the quotes yourself !");
         userModel.setTag(null);
         userModel.setPostalCode(null);
         userModel.setCompany(null);
