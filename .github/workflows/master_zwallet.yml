@@ -51,4 +51,4 @@ jobs:
           app-name: 'zwallet'
           slot-name: 'Production'
           package: '*.jar'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_244507BC399C456286264A2E9E7510AD }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_756D9EB6FC9841B5B9F5B70F745EF203 }}
