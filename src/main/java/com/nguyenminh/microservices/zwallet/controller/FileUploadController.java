@@ -1,6 +1,7 @@
 package com.nguyenminh.microservices.zwallet.controller;
 
 import com.nguyenminh.microservices.zwallet.service.CloudinaryService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,7 +20,8 @@ public class FileUploadController {
 
 
     @PostMapping("/upload")
-    public HashMap uploadImage(@RequestParam("image") MultipartFile file) {
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> uploadImage(@RequestParam("image") MultipartFile file) {
         String data = this.cloudinaryService.upload(file);
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("url", data);

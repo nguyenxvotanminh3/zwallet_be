@@ -21,6 +21,7 @@ public class TransactionHistoryController {
     private TransactionHistoryService transactionHistoryService;
 
     @GetMapping("/all")
+    @ResponseStatus(HttpStatus.OK)
     public List<TransactionHistoryResponse> getAllTransactionHistory (){
         return transactionHistoryService.getAllTransactionHistory();
     }

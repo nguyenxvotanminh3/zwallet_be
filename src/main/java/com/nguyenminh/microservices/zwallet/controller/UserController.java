@@ -55,13 +55,14 @@ public class UserController {
 
 
     @PostMapping("/user/create")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public UserModel createUser(@RequestBody UserRegistrationDto userRegistrationDto){
 
         return userModelService.createUser(userRegistrationDto);
     }
 
     @GetMapping("/check-user/{name}")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Map<String, Object>> checkUsername(@PathVariable String name) {
         log.info("Checking username: " + name);
 
@@ -76,6 +77,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
     @GetMapping("/{userName}")
+    @ResponseStatus(HttpStatus.OK)
     public UserResponse getUserByName(@PathVariable String userName ){
         return userModelService.getUserByUserName(userName );
     }
@@ -89,6 +91,7 @@ public class UserController {
 
 
     @PutMapping("/upload-image/{name}")
+    @ResponseStatus(HttpStatus.OK)
     public UserResponse updateUserImage(@PathVariable String name , @RequestParam("image") MultipartFile file){
         return userModelService.updateUserImage(name,file);
     }

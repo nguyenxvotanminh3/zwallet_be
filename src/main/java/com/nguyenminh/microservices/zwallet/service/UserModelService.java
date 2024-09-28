@@ -9,20 +9,15 @@ import com.nguyenminh.microservices.zwallet.model.PasswordResetToken;
 import com.nguyenminh.microservices.zwallet.model.TransactionHistory;
 import com.nguyenminh.microservices.zwallet.model.UserModel;
 import com.nguyenminh.microservices.zwallet.repository.PasswordResetTokenRepository;
-import com.nguyenminh.microservices.zwallet.repository.TransactionHistoryRepository;
 import com.nguyenminh.microservices.zwallet.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
@@ -36,7 +31,6 @@ public class UserModelService {
     private final Path uploadDir = Paths.get("uploads");
     private final UserRepository userRepository;
     private final AppConfiguration appConfiguration;
-    private final TransactionHistoryRepository transactionHistoryRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final JavaMailSender mailSender;
     private final HttpServletRequest request;

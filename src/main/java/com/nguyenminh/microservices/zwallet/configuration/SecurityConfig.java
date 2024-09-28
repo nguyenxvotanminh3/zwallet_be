@@ -45,6 +45,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/**").permitAll()
                         .requestMatchers("/api/v1/user/delete/").permitAll()
                         .requestMatchers("/api/v2/**").permitAll()
+                        .requestMatchers("/api/errors/**").permitAll()
+
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginProcessingUrl("/perform_login")
