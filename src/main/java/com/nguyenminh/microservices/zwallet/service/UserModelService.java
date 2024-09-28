@@ -265,7 +265,7 @@ public class UserModelService {
 //                baseUrl + "/auth/reset-password?token=" + token);
         message.setText("This is your token: " + token + "\n" +
                 "Click the link below to change your password:\n" +
-                "https://fruits-farm.vercel.app/reset-password");
+                "https://thezwallet.netlify.app/zwallet/pages/forgotpassword");
 
         mailSender.send(message);
     }
