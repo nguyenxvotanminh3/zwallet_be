@@ -15,13 +15,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Document(value = "currency_exchange")
 public class CurrencyExchange {
-    @Id
     private String id;
-
     private String currency_from;
-
     private String currency_to ;
     private BigDecimal conversionMultiple;
-
-    private String environment;
 }
