@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -107,7 +108,10 @@ public class AuthController {
         }
     }
     @PostMapping("/forgot-password")
+    @CrossOrigin("*")
     public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Access-Control-Allow-Origin", "*");
         log.info(request.get("email"));
         String email = request.get("email");
         String response = userModelService.forgotPassword(email);
@@ -115,6 +119,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
+    @CrossOrigin("*")
     public ResponseEntity<?> resetPassword(@RequestParam("t") String t, @RequestBody HashMap<String , String> pass) {
         // Kiểm tra token có tồn tại và còn hiệu lực không
         PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(t);
