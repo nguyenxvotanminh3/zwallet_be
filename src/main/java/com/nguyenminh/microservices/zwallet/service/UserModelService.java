@@ -265,7 +265,7 @@ public class UserModelService {
 //                baseUrl + "/auth/reset-password?token=" + token);
         message.setText("This is your token: " + token + "\n" +
                 "Click the link below to change your password:\n" +
-                "https://thezwallet.netlify.app/zwallet/pages/forgotpassword");
+                "https://thezwallet.netlify.app/Zwallet/pages/changethepass");
 
         mailSender.send(message);
     }

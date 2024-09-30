@@ -63,6 +63,7 @@ public class AuthController {
     private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @PostMapping("/login")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -90,11 +91,13 @@ public class AuthController {
         }
     }
     @PostMapping("/login/success")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> loginSuccess() {
         return ResponseEntity.ok("Login successful!");
     }
 
     @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -109,6 +112,7 @@ public class AuthController {
     }
     @PostMapping("/forgot-password")
     @CrossOrigin("*")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Access-Control-Allow-Origin", "*");
@@ -120,6 +124,7 @@ public class AuthController {
 
     @PostMapping("/reset-password")
     @CrossOrigin("*")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> resetPassword(@RequestParam("t") String t, @RequestBody HashMap<String , String> pass) {
         // Kiểm tra token có tồn tại và còn hiệu lực không
         PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(t);
