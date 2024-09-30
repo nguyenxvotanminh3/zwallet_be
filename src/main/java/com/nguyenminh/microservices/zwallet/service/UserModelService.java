@@ -13,6 +13,7 @@ import com.nguyenminh.microservices.zwallet.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,15 @@ public class UserModelService {
         List<UserModel> userModels = userRepository.findAll();
         return userModels.stream().map(this::mapToUserResponse).toList();
     }
-
+    public ResponseEntity<?> ChangePassword(String userName, String pass) {
+        // Tìm người dùng từ token
+        UserModel user = userRepository.findByUserName(userName);
+        // Cập nhật mật khẩu mới và mã hóa mật khẩu
+        user.setPassword(appConfiguration.passwordEncoder().encode(pass));
+        log.info("change password " + user.getPassword());
+        userRepository.save(user);
+        return ResponseEntity.ok("Password successfully change");
+    }
     public Optional<UserResponse> getUserById(String id) {
         Optional<UserModel> userModel = userRepository.findById(id);
         if (userModel.isPresent()) {

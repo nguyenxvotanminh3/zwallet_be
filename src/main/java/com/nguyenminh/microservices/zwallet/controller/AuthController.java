@@ -2,12 +2,14 @@ package com.nguyenminh.microservices.zwallet.controller;
 import com.nguyenminh.microservices.zwallet.configuration.AppConfiguration;
 import com.nguyenminh.microservices.zwallet.configuration.JwtResponse;
 import com.nguyenminh.microservices.zwallet.configuration.JwtUtils;
+import com.nguyenminh.microservices.zwallet.dto.ChangePasswordRequest;
 import com.nguyenminh.microservices.zwallet.dto.LoginRequest;
 import com.nguyenminh.microservices.zwallet.dto.UserResponse;
 import com.nguyenminh.microservices.zwallet.model.PasswordResetToken;
 import com.nguyenminh.microservices.zwallet.model.UserModel;
 import com.nguyenminh.microservices.zwallet.repository.PasswordResetTokenRepository;
 import com.nguyenminh.microservices.zwallet.repository.UserRepository;
+import com.nguyenminh.microservices.zwallet.service.UserDetailsServiceImpl;
 import com.nguyenminh.microservices.zwallet.service.UserModelService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,10 +26,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -37,6 +42,8 @@ import java.util.stream.Collectors;
 @CrossOrigin("*")
 @Slf4j
 public class AuthController {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Autowired // Field injection for JwtUtils
     private JwtUtils jwtUtils;
     @Autowired
@@ -44,6 +51,8 @@ public class AuthController {
 
     @Autowired
     private final AppConfiguration appConfiguration;
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
 
     @Autowired
     private UserModelService userModelService;
@@ -106,23 +115,25 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestParam("t") String t, @RequestBody String pass) {
+    public ResponseEntity<?> resetPassword(@RequestParam("t") String t, @RequestBody HashMap<String , String> pass) {
         // Kiểm tra token có tồn tại và còn hiệu lực không
         PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(t);
         log.info("token found : " + passwordResetToken);
         if (passwordResetToken == null || passwordResetToken.getExpirationTime().isBefore(LocalDateTime.now())) {
+            log.info("token"+ t);
             return ResponseEntity.badRequest().body("Token is invalid or expired");
         }
 
         // Tìm người dùng từ token
         UserModel user = userRepository.findById(passwordResetToken.getUserId()).orElse(null);
-        log.info("found user : " + user);
+        UserResponse userResponse = userModelService.mapToUserResponse(user);
+        log.info("found user : " + userResponse);
         if (user == null) {
             return ResponseEntity.badRequest().body("User not found");
         }
         log.info("raw pass : " + pass);
         // Cập nhật mật khẩu mới và mã hóa mật khẩu
-        user.setPassword(appConfiguration.passwordEncoder().encode(pass));
+        user.setPassword(appConfiguration.passwordEncoder().encode(pass.get("newpass")));
         log.info("change password " + user.getPassword());
         userRepository.save(user);
 
@@ -130,6 +141,19 @@ public class AuthController {
         passwordResetTokenRepository.deleteAllById(Collections.singleton(user.getId()));
 
         return ResponseEntity.ok("Password successfully reset");
+    }
+    @PutMapping("/user/change-pass")
+    public ResponseEntity<?> changPassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+        try {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(changePasswordRequest.getUserName());
+            if (passwordEncoder.matches(changePasswordRequest.getOldPass(), userDetails.getPassword())) {
+                return userModelService.ChangePassword(changePasswordRequest.getUserName(),changePasswordRequest.getNewPass());
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Password not match");
+            }
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+        }
     }
 
 
