@@ -237,10 +237,6 @@ public class UserModelService {
 
 
 
-
-
-
-
     public String forgotPassword(String email) {
 
         Optional<UserModel> userOptional = userRepository.findByEmailAddress(email);
@@ -261,6 +257,7 @@ public class UserModelService {
                 .replace(request.getRequestURI(), "");
         log.info("called mail sender");
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("worknguyenvotanminh@gmail.com");
         message.setTo(to);
         log.info("send to : " + to);
         message.setSubject("Reset Your Password");
