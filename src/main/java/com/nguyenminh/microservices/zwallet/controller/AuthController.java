@@ -113,18 +113,18 @@ public class AuthController {
     @PostMapping("/forgot-password")
     @CrossOrigin("*")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Access-Control-Allow-Origin", "*");
         log.info(request.get("email"));
         String email = request.get("email");
-        String response = userModelService.forgotPassword(email);
-        return ResponseEntity.ok(response);
+        ResponseEntity<?> response = userModelService.forgotPassword(email);
+        return response;
     }
 
     @PostMapping("/reset-password")
     @CrossOrigin("*")
-    @ResponseStatus(HttpStatus.OK)
+
     public ResponseEntity<?> resetPassword(@RequestParam("t") String t, @RequestBody HashMap<String , String> pass) {
         // Kiểm tra token có tồn tại và còn hiệu lực không
         PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(t);

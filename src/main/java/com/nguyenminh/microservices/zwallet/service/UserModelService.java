@@ -237,12 +237,12 @@ public class UserModelService {
 
 
 
-    public String forgotPassword(String email) {
+    public ResponseEntity<?> forgotPassword(String email) {
 
         Optional<UserModel> userOptional = userRepository.findByEmailAddress(email);
 
         if (userOptional.isEmpty()) {
-            throw new IllegalStateException("Email không tồn tại");
+            throw new IllegalStateException("Email not found. Please provide a valid email address.");
         }
 
         UserModel user = userOptional.get();
@@ -250,7 +250,7 @@ public class UserModelService {
 
         String token = createPasswordResetToken(user);
 
-        return "Đã gửi token reset password đến email của bạn";
+        return ResponseEntity.ok(mapToUserResponse(user));
     }
     public void sendEmail(String to, String token) {
         String baseUrl = request.getRequestURL().toString()
