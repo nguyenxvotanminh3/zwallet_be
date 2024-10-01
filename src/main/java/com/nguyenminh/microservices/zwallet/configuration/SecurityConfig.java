@@ -48,7 +48,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/user/delete/").permitAll()
                         .requestMatchers("/api/v2/**").permitAll()
                         .requestMatchers("/api/errors/**").permitAll()
-                        .requestMatchers(" /api/v1/currency-exchange/**").permitAll()
+                        .requestMatchers("/api/v1/currency-exchange/**").permitAll()
+                        .requestMatchers("/api/v3/calculate").permitAll()
+                        .requestMatchers("/api/v3/calculate-total").permitAll()
+
 
                         .anyRequest().authenticated())
                 .formLogin(form -> form

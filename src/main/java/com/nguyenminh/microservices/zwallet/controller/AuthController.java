@@ -82,7 +82,6 @@ public class AuthController {
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.joining(","));
             UserModel userModel =  userRepository.findByUserName(username);
-
             userRepository.save(userModel);
             return ResponseEntity.ok(new JwtResponse(jwt, username, roles)); // Trả về JWT trong response
         } catch (AuthenticationException e) {
