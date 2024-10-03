@@ -118,15 +118,27 @@ public class UserModelService {
     }
 
     public TransactionHistoryResponse mapToTransactionResponse(TransactionHistory transactionHistory) {
+        // Kiểm tra nếu transactionHistory là null
+        if (transactionHistory == null) {
+            // Có thể ném ngoại lệ hoặc trả về null tùy theo logic của bạn
+            throw new IllegalArgumentException("Transaction history is null");
+        }
+
+        // Kiểm tra nếu user bên trong transactionHistory là null
+        if (transactionHistory.getUser() == null) {
+            throw new IllegalArgumentException("User in transaction history is null");
+        }
+
+        // Ánh xạ dữ liệu từ TransactionHistory sang TransactionHistoryResponse
         return TransactionHistoryResponse.builder()
-                .transactionId(transactionHistory.getId())
-                .amountUsed(transactionHistory.getAmountUsed())
-                .localDateTime(transactionHistory.getLocalDateTime())
-                .purpose(transactionHistory.getPurpose())
-                .moneyLeft(transactionHistory.getMoneyLeft())
-                .userId(transactionHistory.getUser().getId())
+                .transactionId(transactionHistory.getId())          // Lấy ID của transaction
+                .amountUsed(transactionHistory.getAmountUsed())     // Số tiền đã sử dụng
+                .purpose(transactionHistory.getPurpose())           // Mục đích sử dụng tiền
+                .moneyLeft(transactionHistory.getMoneyLeft())       // Số tiền còn lại
+                .userId(transactionHistory.getUser().getId())       // ID của người dùng
                 .build();
     }
+
 
     public UserResponse mapToUserResponse(UserModel userModel) {
         List<TransactionHistoryResponse> transactionHistoryResponses = userModel.getTransactionHistory() != null
@@ -173,10 +185,13 @@ public class UserModelService {
             List<TransactionHistory> transactionHistories = userModel.getTransactionHistory();
             List<TransactionHistoryResponse> transactionHistoryResponses = (transactionHistories != null)
                     ? transactionHistories.stream()
+                    .filter(Objects::nonNull) // Bỏ qua các phần tử null
                     .map(this::mapToTransactionResponse)
                     .toList()
                     : Collections.emptyList();
+
             log.info("image " + userModel.getProfileImage());
+
             return UserResponse.builder()
                     .userId(userModel.getId())
                     .company(userModel.getCompany())
@@ -193,8 +208,6 @@ public class UserModelService {
                     .emailAddress(userModel.getEmailAddress())
                     .fullName(userModel.getFullName())
                     .totalAmount(userModel.getTotalAmount())
-                    // .profileImage(userModel.getProfileImage()) // Uncomment if needed
-                    .quotes(userModel.getQuotes())
                     .transactionHistoryResponses(transactionHistoryResponses)
                     .build();
         } else {
