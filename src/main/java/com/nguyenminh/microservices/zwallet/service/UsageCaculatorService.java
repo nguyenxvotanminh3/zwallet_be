@@ -6,6 +6,7 @@ import com.nguyenminh.microservices.zwallet.model.PercentUsageTotal;
 import com.nguyenminh.microservices.zwallet.model.TransactionHistory;
 import com.nguyenminh.microservices.zwallet.model.UserModel;
 import com.nguyenminh.microservices.zwallet.repository.UserRepository;
+import jdk.jfr.Category;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,6 +28,8 @@ public class UsageCaculatorService {
         return TransactionHistoryResponse.builder()
                 .transactionId(transactionHistory.getId())
                 .amountUsed(transactionHistory.getAmountUsed())
+                .category(transactionHistory.getCategory())
+                .createdAt(transactionHistory.getCreatedAt())
                 .purpose(transactionHistory.getPurpose())
                 .moneyLeft(transactionHistory.getMoneyLeft())
                 .userId(transactionHistory.getUser().getId())
@@ -33,120 +37,257 @@ public class UsageCaculatorService {
     }
 
     public ResponseEntity<?> usageCaculate(String username){
-        AtomicInteger food = new AtomicInteger();
-        AtomicInteger bill = new AtomicInteger();
-        AtomicInteger entertain = new AtomicInteger();
-        AtomicInteger shopping = new AtomicInteger();
-        AtomicInteger investment = new AtomicInteger();
-
-
-        UserModel userModel = userRepository.findByUserName(username);
-
-        if(userModel == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Can't find user with user name: "+ username);
-        }
-        List<TransactionHistory> transactionHistories = userModel.getTransactionHistory();
-
-        List<TransactionHistoryResponse> transactionResponses = transactionHistories.stream()
-                .map(this::mapToTransactionResponse) // Ánh xạ từng TransactionHistory thành TransactionResponse
-                .toList();
-
-        AtomicInteger totalTransaction = new AtomicInteger(userModel.getTransactionHistory().size());
-
-
-        transactionResponses.forEach(
-                transactionHistoryResponse -> {
-               if(transactionHistoryResponse.getPurpose().equals("Food")){
-                   food.getAndIncrement();
-
-               }
-               if(transactionHistoryResponse.getPurpose().equals("Bill")){
-                   bill.getAndIncrement();
-                    }
-               if(transactionHistoryResponse.getPurpose().equals("Entertain")){
-                   entertain.getAndIncrement();
-                    }
-               if(transactionHistoryResponse.getPurpose().equals("Shopping")){
-                   shopping.getAndIncrement();
-                    }
-               if(transactionHistoryResponse.getPurpose().equals("Investment")){
-                   investment.getAndIncrement();
-                    }
-               if(transactionHistoryResponse.getPurpose().equals("Add money to wallet")){
-                        totalTransaction.getAndDecrement();
-                    }
-                });
-        totalTransaction.getAndDecrement();
-        log.info("The total: " + totalTransaction);
-        log.info("Food " + food);
-        log.info("Bill " + bill);
-        log.info("Entertain " + entertain);
-        log.info("Shopping " + shopping);
-        log.info("Investment " + investment);
-        PercentUsage percentUsage = new PercentUsage();
-        percentUsage.setFood((float) ((food.get()) * 100L) / totalTransaction.get());
-        percentUsage.setBill((float) ((bill.get()) * 100L / totalTransaction.get()));
-        percentUsage.setEntertain((float) ((entertain.get()) * 100L / totalTransaction.get()));
-        percentUsage.setShopping((float) ((shopping.get()) * 100L / totalTransaction.get()));
-        percentUsage.setInvestment((float) ((investment.get()) * 100L / totalTransaction.get()));
-
-        return ResponseEntity.ok(percentUsage);
-
-    }
-
-    public ResponseEntity<?> usageCaculateTotal(String username){
         AtomicInteger food = new AtomicInteger(0);
         AtomicInteger bill = new AtomicInteger(0);
         AtomicInteger entertain = new AtomicInteger(0);
         AtomicInteger shopping = new AtomicInteger(0);
         AtomicInteger investment = new AtomicInteger(0);
-
+        AtomicInteger medicine = new AtomicInteger(0);
+        AtomicInteger education = new AtomicInteger(0);
+        AtomicInteger travel = new AtomicInteger(0);
+        AtomicInteger rent = new AtomicInteger(0);
+        AtomicInteger transportation = new AtomicInteger(0);
+        AtomicInteger utilities = new AtomicInteger(0);
+        AtomicInteger savings = new AtomicInteger(0);
+        AtomicInteger charity = new AtomicInteger(0);
+        AtomicInteger insurance = new AtomicInteger(0);
+        AtomicInteger gifts = new AtomicInteger(0);
+        AtomicInteger others = new AtomicInteger(0);
+        AtomicInteger recive = new AtomicInteger(0);
+        AtomicInteger transfer = new AtomicInteger(0);
 
         UserModel userModel = userRepository.findByUserName(username);
+
         if(userModel == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Can't find user with user name: "+ username);
         }
+
         List<TransactionHistory> transactionHistories = userModel.getTransactionHistory();
 
+
         List<TransactionHistoryResponse> transactionResponses = transactionHistories.stream()
-                .map(this::mapToTransactionResponse) // Ánh xạ từng TransactionHistory thành TransactionResponse
+                .map(this::mapToTransactionResponse)
                 .toList();
 
-        transactionResponses.forEach(
-                transactionHistoryResponse -> {
-                    log.info("tag "+transactionHistoryResponse.getPurpose());
-                    if(transactionHistoryResponse.getPurpose().equals("Food")){
-                        food.getAndSet( food.get() +Integer.parseInt(transactionHistoryResponse.getAmountUsed()));
 
-                        log.info("food " + food.get());
-                    }
-                    if(transactionHistoryResponse.getPurpose().equals("Bill")){
-                        bill.getAndSet( (bill.get() +Integer.parseInt(transactionHistoryResponse.getAmountUsed())));
-                        log.info("bill " + bill.get());
-                    }
-                    if(transactionHistoryResponse.getPurpose().equals("Entertain")){
-                        entertain.getAndSet( (entertain.get() +Integer.parseInt(transactionHistoryResponse.getAmountUsed())));
-                        log.info("entertain " + entertain.get());
-                    }
-                    if(transactionHistoryResponse.getPurpose().equals("Shopping")){
-                        shopping.getAndSet( (shopping.get() +Integer.parseInt(transactionHistoryResponse.getAmountUsed())));
-                        log.info("shopping " + shopping.get());
-                    }
-                    if(transactionHistoryResponse.getPurpose().equals("Investment")){
-                        investment.getAndSet( (investment.get() +Integer.parseInt(transactionHistoryResponse.getAmountUsed())));
-                        log.info("investment " + investment.get());
-                    }
-                });
+        AtomicInteger totalTransaction = new AtomicInteger(userModel.getTransactionHistory().size());
 
-        PercentUsageTotal percentUsage = new PercentUsageTotal();
-        percentUsage.setFood(BigDecimal.valueOf((int) food.get()));
-        percentUsage.setBill(BigDecimal.valueOf((int) bill.get()));
-        percentUsage.setEntertain(BigDecimal.valueOf((int) entertain.get()));
-        percentUsage.setShopping(BigDecimal.valueOf((int) shopping.get()));
-        percentUsage.setInvestment(BigDecimal.valueOf((int) investment.get()));
+        transactionResponses.forEach(transactionHistoryResponse -> {
+            String category = transactionHistoryResponse.getCategory();
+
+            if (category != null) {
+                log.info("Category: " + category);
+                if (category.equals("Food")) {
+                    food.getAndIncrement();
+
+                } else if (category.equals("Bill")) {
+                    bill.getAndIncrement();
+                } else if (category.equals("Entertain")) {
+                    entertain.getAndIncrement();
+                } else if (category.equals("Shopping")) {
+                    shopping.getAndIncrement();
+                } else if (category.equals("Investment")) {
+                    investment.getAndIncrement();
+                } else if (category.equals("Medicine")) {
+                    medicine.getAndIncrement();
+                } else if (category.equals("Education")) {
+                    education.getAndIncrement();
+                } else if (category.equals("Travel")) {
+                    travel.getAndIncrement();
+                } else if (category.equals("Rent")) {
+                    rent.getAndIncrement();
+                } else if (category.equals("Transportation")) {
+                    transportation.getAndIncrement();
+                } else if (category.equals("Utilities")) {
+                    utilities.getAndIncrement();
+                } else if (category.equals("Savings")) {
+                    savings.getAndIncrement();
+                } else if (category.equals("Charity")) {
+                    charity.getAndIncrement();
+                } else if (category.equals("Insurance")) {
+                    insurance.getAndIncrement();
+                } else if (category.equals("Gifts")) {
+                    gifts.getAndIncrement();
+                } else if (category.equals("Others")) {
+                    others.getAndIncrement();
+                } else if (category.equals("Recive money")) {
+                    recive.getAndIncrement();
+                } else if (category.equals("Transfer money")) {
+                    transfer.getAndIncrement();
+                } else {
+                    totalTransaction.getAndDecrement(); // Invalid or empty category
+                }
+
+            }
+        });
+
+        log.info("The total: " + totalTransaction);
+        log.info("Food: " + food);
+        log.info("Bill: " + bill);
+        log.info("Entertain: " + entertain);
+        log.info("Shopping: " + shopping);
+        log.info("Investment: " + investment);
+        log.info("Medicine: " + medicine);
+        log.info("Education: " + education);
+        log.info("Travel: " + travel);
+        log.info("Rent: " + rent);
+        log.info("Transportation: " + transportation);
+        log.info("Utilities: " + utilities);
+        log.info("Savings: " + savings);
+        log.info("Charity: " + charity);
+        log.info("Insurance: " + insurance);
+        log.info("Recive" + recive);
+        log.info("Transfer" + transfer);
+        log.info("Gifts: " + gifts);
+        log.info("Others: " + others);
+
+        PercentUsage percentUsage = new PercentUsage();
+        percentUsage.setFood((float) (food.get() * 100L / totalTransaction.get()));
+        percentUsage.setBill((float) (bill.get() * 100L / totalTransaction.get()));
+        percentUsage.setEntertain((float) (entertain.get() * 100L / totalTransaction.get()));
+        percentUsage.setShopping((float) (shopping.get() * 100L / totalTransaction.get()));
+        percentUsage.setInvestment((float) (investment.get() * 100L / totalTransaction.get()));
+        percentUsage.setMedicine((float) (medicine.get() * 100L / totalTransaction.get()));
+        percentUsage.setEducation((float) (education.get() * 100L / totalTransaction.get()));
+        percentUsage.setTravel((float) (travel.get() * 100L / totalTransaction.get()));
+        percentUsage.setRent((float) (rent.get() * 100L / totalTransaction.get()));
+        percentUsage.setTransportation((float) (transportation.get() * 100L / totalTransaction.get()));
+        percentUsage.setUtilities((float) (utilities.get() * 100L / totalTransaction.get()));
+        percentUsage.setSavings((float) (savings.get() * 100L / totalTransaction.get()));
+        percentUsage.setCharity((float) (charity.get() * 100L / totalTransaction.get()));
+        percentUsage.setInsurance((float) (insurance.get() * 100L / totalTransaction.get()));
+        percentUsage.setRecive((float) (recive.get() * 100L / totalTransaction.get()));
+        percentUsage.setTransfer((float) (transfer.get() * 100L / totalTransaction.get()));
+        percentUsage.setGifts((float) (gifts.get() * 100L / totalTransaction.get()));
+        percentUsage.setOthers((float) (others.get() * 100L / totalTransaction.get()));
 
         return ResponseEntity.ok(percentUsage);
-
     }
+
+
+    public ResponseEntity<?> usageCaculateTotal(String username){
+        // Initialize categories with default values
+        AtomicInteger food = new AtomicInteger(0);
+        AtomicInteger bill = new AtomicInteger(0);
+        AtomicInteger entertain = new AtomicInteger(0);
+        AtomicInteger shopping = new AtomicInteger(0);
+        AtomicInteger investment = new AtomicInteger(0);
+        AtomicInteger medicine = new AtomicInteger(0);
+        AtomicInteger education = new AtomicInteger(0);
+        AtomicInteger travel = new AtomicInteger(0);
+        AtomicInteger rent = new AtomicInteger(0);
+        AtomicInteger transportation = new AtomicInteger(0);
+        AtomicInteger utilities = new AtomicInteger(0);
+        AtomicInteger savings = new AtomicInteger(0);
+        AtomicInteger charity = new AtomicInteger(0);
+        AtomicInteger insurance = new AtomicInteger(0);
+        AtomicInteger gifts = new AtomicInteger(0);
+        AtomicInteger others = new AtomicInteger(0);
+        AtomicInteger recive = new AtomicInteger(0);
+        AtomicInteger transfer = new AtomicInteger(0);
+        // Find user by username
+        UserModel userModel = userRepository.findByUserName(username);
+        if (userModel == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Can't find user with user name: " + username);
+        }
+
+        List<TransactionHistory> transactionHistories = userModel.getTransactionHistory();
+
+
+
+        // Map transactions
+        List<TransactionHistoryResponse> transactionResponses = transactionHistories.stream()
+                .map(this::mapToTransactionResponse)
+                .toList();
+
+        log.info("Transaction" + transactionResponses);
+
+        // Calculate totals for each category
+        transactionResponses.forEach(transactionHistoryResponse -> {
+            String category = transactionHistoryResponse.getCategory();
+            int amount = Integer.parseInt(transactionHistoryResponse.getAmountUsed());
+
+            switch (category) {
+                case "Food":
+                    food.getAndSet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + food.get());
+                    break;
+                case "Bill":
+                    bill.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + bill.get());
+                    break;
+                case "Entertain":
+                    entertain.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + entertain.get());
+                    break;
+                case "Shopping":
+                    shopping.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + shopping.get());
+                    break;
+                case "Investment":
+                    investment.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + investment.get());
+                    break;
+                case "Medicine":
+                    medicine.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + medicine.get());
+                    break;
+                case "Education":
+                    education.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + education.get());
+                    break;
+                case "Travel":
+                    travel.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + travel.get());
+                    break;
+                case "Rent":
+                    rent.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + rent.get());
+                    break;
+                case "Transportation":
+                    transportation.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + transportation.get());
+                    break;
+                case "Utilities":
+                    utilities.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + utilities.get());
+                    break;
+                case "Savings":
+                    savings.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + savings.get());
+                    break;
+                case "Charity":
+                    charity.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + charity.get());
+                    break;
+                case "Insurance":
+                    insurance.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + insurance.get());
+                    break;
+                case "Gifts":
+                    gifts.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + gifts.get());
+                    break;
+                case "Recive money":
+                    recive.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + recive.get());
+                    break;
+                case "Transfer money":
+                    transfer.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + transfer.get());
+                    break;
+                case "Others":
+                    others.addAndGet(Integer.parseInt(transactionHistoryResponse.getAmountUsed()) + others.get());
+                    break;
+            }
+        });
+
+        // Set up PercentUsageTotal object
+        PercentUsageTotal percentUsage = new PercentUsageTotal();
+        percentUsage.setFood(BigDecimal.valueOf(food.get()));
+        percentUsage.setBill(BigDecimal.valueOf(bill.get()));
+        percentUsage.setEntertain(BigDecimal.valueOf(entertain.get()));
+        percentUsage.setShopping(BigDecimal.valueOf(shopping.get()));
+        percentUsage.setInvestment(BigDecimal.valueOf(investment.get()));
+        percentUsage.setMedicine(BigDecimal.valueOf(medicine.get()));
+        percentUsage.setEducation(BigDecimal.valueOf(education.get()));
+        percentUsage.setTravel(BigDecimal.valueOf(travel.get()));
+        percentUsage.setRent(BigDecimal.valueOf(rent.get()));
+        percentUsage.setTransportation(BigDecimal.valueOf(transportation.get()));
+        percentUsage.setUtilities(BigDecimal.valueOf(utilities.get()));
+        percentUsage.setSavings(BigDecimal.valueOf(savings.get()));
+        percentUsage.setCharity(BigDecimal.valueOf(charity.get()));
+        percentUsage.setInsurance(BigDecimal.valueOf(insurance.get()));
+        percentUsage.setGifts(BigDecimal.valueOf(gifts.get()));
+        percentUsage.setOthers(BigDecimal.valueOf(others.get()));
+        percentUsage.setRecive(BigDecimal.valueOf(recive.get()));
+        percentUsage.setTransfer(BigDecimal.valueOf(transfer.get()));
+
+        return ResponseEntity.ok(percentUsage);
+    }
+
 
 }

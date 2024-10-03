@@ -17,4 +17,17 @@ public class PercentUsageTotal {
     private BigDecimal Entertain;
     private BigDecimal Shopping;
     private BigDecimal Investment;
+    private BigDecimal Medicine;
+    private BigDecimal Education;
+    private BigDecimal Travel;
+    private BigDecimal Rent;
+    private BigDecimal Transportation;
+    private BigDecimal Utilities;
+    private BigDecimal Savings;
+    private BigDecimal Charity;
+    private BigDecimal Insurance;
+    private BigDecimal Gifts;
+    private BigDecimal Recive;
+    private BigDecimal Transfer;
+    private BigDecimal Others;
 }
