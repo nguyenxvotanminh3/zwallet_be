@@ -30,9 +30,10 @@ public class TransactionHistoryController {
     public PaginatedResponse<TransactionHistoryResponse> getTransactionHistoryPagination (
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sort,
             @RequestParam String userName
     ) throws UnsupportedEncodingException {
-        return transactionHistoryService.getTransactionHistoryPagination(page,size,userName);
+        return transactionHistoryService.getTransactionHistoryPagination(page,size,sort,userName);
     }
 
 

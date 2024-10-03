@@ -17,9 +17,7 @@ import org.springframework.stereotype.Service;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -84,18 +82,16 @@ public class TransactionHistoryService {
         return TransactionHistoryResponse.builder()
                 .transactionId(transactionHistory.getId())
                 .amountUsed(transactionHistory.getAmountUsed())
-                .localDateTime(transactionHistory.getLocalDateTime())
                 .purpose(transactionHistory.getPurpose())
+                .createdAt(transactionHistory.getCreatedAt())
+                .category(transactionHistory.getCategory())
                 .moneyLeft(transactionHistory.getMoneyLeft())
                 .userId(transactionHistory.getUser().getId())
                 .build();
     }
 
 
-    public PaginatedResponse<TransactionHistoryResponse> getTransactionHistoryPagination(int page, int size, String userName) throws UnsupportedEncodingException {
-        // Tạo PageRequest để phân trang (không cần thiết nếu bạn không sử dụng Spring Data Page)
-        PageRequest pageRequest = PageRequest.of(page, size);
-
+    public PaginatedResponse<TransactionHistoryResponse> getTransactionHistoryPagination(int page, int size, String sort, String userName) throws UnsupportedEncodingException {
         // Tìm kiếm người dùng theo userName
         UserModel userModel = userRepository.findByUserName(userName);
         if (userModel == null) {
@@ -104,6 +100,12 @@ public class TransactionHistoryService {
 
         // Lấy danh sách giao dịch của người dùng
         List<TransactionHistory> transactionHistories = userModel.getTransactionHistory();
+
+        // Sắp xếp danh sách giao dịch theo createdAt giảm dần (mới nhất trước) và xử lý null
+        transactionHistories.sort(Comparator.comparing(
+                TransactionHistory::getCreatedAt,
+                Comparator.nullsLast(Comparator.reverseOrder()) // Đảm bảo xử lý null và sắp xếp giảm dần
+        ));
 
         // Tổng số giao dịch
         int totalElements = transactionHistories.size();
@@ -120,12 +122,15 @@ public class TransactionHistoryService {
             return new PaginatedResponse<>(page, size, totalPages, totalElements, new ArrayList<>());
         }
 
-        // Lấy danh sách giao dịch trong trang hiện tại
-        List<TransactionHistory> paginatedTransactions = transactionHistories.subList(startIndex, endIndex);
+        // Lấy danh sách giao dịch trong trang hiện tại, bỏ qua các phần tử null
+        List<TransactionHistory> paginatedTransactions = transactionHistories.subList(startIndex, endIndex)
+                .stream()
+                .filter(Objects::nonNull) // Bỏ qua phần tử null
+                .collect(Collectors.toList());
 
         // Ánh xạ từ TransactionHistory sang TransactionHistoryResponse
         List<TransactionHistoryResponse> transactionResponses = paginatedTransactions.stream()
-                .map(this::mapToTransactionResponse) // Ánh xạ từng TransactionHistory thành TransactionResponse
+                .map(this::mapToTransactionResponse)
                 .collect(Collectors.toList());
 
         // Trả về đối tượng PaginatedResponse
@@ -137,4 +142,7 @@ public class TransactionHistoryService {
                 transactionResponses // Danh sách giao dịch trong trang hiện tại
         );
     }
+
+
+
 }

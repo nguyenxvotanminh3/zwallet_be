@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -33,5 +34,5 @@ public class UserResponse implements Serializable {
     private String totalAmount;
     private String authenJwt;
     private String profileImage;
-    private List<TransactionHistoryResponse> transactionHistoryResponses;
+    private List<TransactionHistoryResponse> transactionHistoryResponses = new ArrayList<>();
 }

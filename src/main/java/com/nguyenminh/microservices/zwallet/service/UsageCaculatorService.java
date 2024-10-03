@@ -26,7 +26,6 @@ public class UsageCaculatorService {
         return TransactionHistoryResponse.builder()
                 .transactionId(transactionHistory.getId())
                 .amountUsed(transactionHistory.getAmountUsed())
-                .localDateTime(transactionHistory.getLocalDateTime())
                 .purpose(transactionHistory.getPurpose())
                 .moneyLeft(transactionHistory.getMoneyLeft())
                 .userId(transactionHistory.getUser().getId())

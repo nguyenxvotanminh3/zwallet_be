@@ -4,6 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -12,11 +16,12 @@ import lombok.NoArgsConstructor;
 public class TransactionHistoryResponse {
     private String transactionId;
     private String amountUsed;
-    private String localDateTime;
+    private String category;
     private String moneyLeft;
     private String purpose;
     private String userId;
+    @CreatedDate
+    private LocalDateTime createdAt;
 
-    public TransactionHistoryResponse(String amountUsed, String purpose, String localDateTime, String moneyLeft) {
-    }
+
 }
