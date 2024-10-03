@@ -27,12 +27,8 @@ public class TransactionHistory {
     private String category;
     @CreatedDate
     private LocalDateTime createdAt;
-
-
-
     private String purpose;
     private String moneyLeft;
-
     @DBRef
     @JsonIgnore
     private UserModel user; // Use @DBRef to reference the user
