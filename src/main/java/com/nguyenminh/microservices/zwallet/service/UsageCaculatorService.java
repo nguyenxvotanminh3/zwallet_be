@@ -29,9 +29,16 @@ public class UsageCaculatorService {
 
     private final UserRepository userRepository;
     private final MoneyPredictRepository moneyPredictRepository;
+    private final ValidateUserService validateUserService;
     private final Mapper mapper;
 
     public ResponseEntity<?> usageCaculate(String username){
+        validateUserService.checkUserIsAcceptToUserApi(username);
+        UserModel userModel = userRepository.findByUserName(username);
+
+        if(userModel == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Can't find user with user name: "+ username);
+        }
         AtomicInteger food = new AtomicInteger(0);
         AtomicInteger bill = new AtomicInteger(0);
         AtomicInteger entertain = new AtomicInteger(0);
@@ -51,11 +58,6 @@ public class UsageCaculatorService {
         AtomicInteger recive = new AtomicInteger(0);
         AtomicInteger transfer = new AtomicInteger(0);
 
-        UserModel userModel = userRepository.findByUserName(username);
-
-        if(userModel == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Can't find user with user name: "+ username);
-        }
 
         List<TransactionHistory> transactionHistories = userModel.getTransactionHistory();
 
@@ -142,6 +144,7 @@ public class UsageCaculatorService {
 
 
     public ResponseEntity<?> usageCaculateTotal(String username){
+        validateUserService.checkUserIsAcceptToUserApi(username);
         // Initialize categories with default values
         AtomicInteger food = new AtomicInteger(0);
         AtomicInteger bill = new AtomicInteger(0);
@@ -267,12 +270,10 @@ public class UsageCaculatorService {
 
 
     public ResponseEntity<?> getFutureFund(String userName,String incomes, boolean save) {
+        validateUserService.checkUserIsAcceptToUserApi(userName);
         log.info("userName{}", userName);
         UserModel userModel = userRepository.findByUserName(userName);
 
-        if(userModel == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Can't find user");
-        }
         float needs = (float) (Integer.parseInt(incomes) * 55) /100;
         float saving = (float) (Integer.parseInt(incomes) * 10) /100;
         float investment = (float) (Integer.parseInt(incomes) * 10) /100;

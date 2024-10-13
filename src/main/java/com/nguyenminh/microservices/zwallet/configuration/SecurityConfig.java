@@ -42,18 +42,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/forgot-password").permitAll()
                         .requestMatchers("/api/auth/reset-password").permitAll()
-                        .requestMatchers("/api/v1/all").permitAll()
                         .requestMatchers("/api/v1/user/create").permitAll()
-                        .requestMatchers("/api/v1/**").permitAll()
-                        .requestMatchers("/api/v1/user/delete/").permitAll()
-                        .requestMatchers("/api/v2/**").permitAll()
                         .requestMatchers("/api/errors/**").permitAll()
                         .requestMatchers("/api/v1/currency-exchange/**").permitAll()
-                        .requestMatchers("/api/v3/calculate").permitAll()
-                        .requestMatchers("/api/v3/calculate-total").permitAll()
-                        .requestMatchers("/api/v3/future").permitAll()
-
-
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginProcessingUrl("/perform_login")

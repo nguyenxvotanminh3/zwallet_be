@@ -37,16 +37,18 @@ public class UserController {
     private final ValidateUserService validateUserService;
     private final ImageService imageService;
 
-    @GetMapping("/user/all")
-    @ResponseStatus(HttpStatus.OK)
-    public List<UserResponse> getAllUser(){
-        return userModelService.getAllUser();
-    }
-    @GetMapping("/user/{id}")
-    @ResponseStatus(HttpStatus.FOUND)
-    public Optional<UserResponse> getUserById(@PathVariable String id){
-        return userModelService.getUserById(id);
-    }
+//    @GetMapping("/user/all")
+//    @ResponseStatus(HttpStatus.OK)
+//    public List<UserResponse> getAllUser(){
+//        return userModelService.getAllUser();
+//    }
+
+
+//    @GetMapping("/user/{id}")
+//    @ResponseStatus(HttpStatus.FOUND)
+//    public Optional<UserResponse> getUserById(@PathVariable String id){
+//        return userModelService.getUserById(id);
+//    }
 
     @PutMapping("/user/update/{name}")
     public UserResponse updateUserDetail(@PathVariable String name, @RequestBody UserModel userModel){
@@ -86,7 +88,7 @@ public class UserController {
     @GetMapping("/{userName}")
     @ResponseStatus(HttpStatus.OK)
     public UserResponse getUserByName(@PathVariable String userName ){
-        return userModelService.getUserByUserName(userName );
+        return userModelService.getUserByUserName2(userName );
     }
 
     @DeleteMapping("/user/delete/{userName}")
