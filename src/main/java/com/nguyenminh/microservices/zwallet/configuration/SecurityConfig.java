@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/currency-exchange/**").permitAll()
                         .requestMatchers("/api/v3/calculate").permitAll()
                         .requestMatchers("/api/v3/calculate-total").permitAll()
+                        .requestMatchers("/api/v3/future").permitAll()
 
 
                         .anyRequest().authenticated())

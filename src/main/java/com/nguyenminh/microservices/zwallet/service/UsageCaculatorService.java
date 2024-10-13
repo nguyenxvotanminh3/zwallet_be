@@ -1,10 +1,13 @@
 package com.nguyenminh.microservices.zwallet.service;
 
+import com.nguyenminh.microservices.zwallet.dto.MoneyPredict;
 import com.nguyenminh.microservices.zwallet.dto.TransactionHistoryResponse;
+import com.nguyenminh.microservices.zwallet.dto.UserResponse;
 import com.nguyenminh.microservices.zwallet.model.PercentUsage;
 import com.nguyenminh.microservices.zwallet.model.PercentUsageTotal;
 import com.nguyenminh.microservices.zwallet.model.TransactionHistory;
 import com.nguyenminh.microservices.zwallet.model.UserModel;
+import com.nguyenminh.microservices.zwallet.repository.MoneyPredictRepository;
 import com.nguyenminh.microservices.zwallet.repository.UserRepository;
 import jdk.jfr.Category;
 import lombok.RequiredArgsConstructor;
@@ -16,25 +19,17 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class UsageCaculatorService {
+
     private final UserRepository userRepository;
-    private final TransactionHistoryService transactionHistoryService;
-    public TransactionHistoryResponse mapToTransactionResponse(TransactionHistory transactionHistory) {
-        return TransactionHistoryResponse.builder()
-                .transactionId(transactionHistory.getId())
-                .amountUsed(transactionHistory.getAmountUsed())
-                .category(transactionHistory.getCategory())
-                .createdAt(transactionHistory.getCreatedAt())
-                .purpose(transactionHistory.getPurpose())
-                .moneyLeft(transactionHistory.getMoneyLeft())
-                .userId(transactionHistory.getUser().getId())
-                .build();
-    }
+    private final MoneyPredictRepository moneyPredictRepository;
+    private final Mapper mapper;
 
     public ResponseEntity<?> usageCaculate(String username){
         AtomicInteger food = new AtomicInteger(0);
@@ -66,7 +61,7 @@ public class UsageCaculatorService {
 
 
         List<TransactionHistoryResponse> transactionResponses = transactionHistories.stream()
-                .map(this::mapToTransactionResponse)
+                .map(mapper::mapToTransactionResponse)
                 .toList();
 
 
@@ -76,46 +71,27 @@ public class UsageCaculatorService {
             String category = transactionHistoryResponse.getCategory();
 
             if (category != null) {
-                log.info("Category: " + category);
-                if (category.equals("Food")) {
-                    food.getAndIncrement();
-
-                } else if (category.equals("Bill")) {
-                    bill.getAndIncrement();
-                } else if (category.equals("Entertain")) {
-                    entertain.getAndIncrement();
-                } else if (category.equals("Shopping")) {
-                    shopping.getAndIncrement();
-                } else if (category.equals("Investment")) {
-                    investment.getAndIncrement();
-                } else if (category.equals("Medicine")) {
-                    medicine.getAndIncrement();
-                } else if (category.equals("Education")) {
-                    education.getAndIncrement();
-                } else if (category.equals("Travel")) {
-                    travel.getAndIncrement();
-                } else if (category.equals("Rent")) {
-                    rent.getAndIncrement();
-                } else if (category.equals("Transportation")) {
-                    transportation.getAndIncrement();
-                } else if (category.equals("Utilities")) {
-                    utilities.getAndIncrement();
-                } else if (category.equals("Savings")) {
-                    savings.getAndIncrement();
-                } else if (category.equals("Charity")) {
-                    charity.getAndIncrement();
-                } else if (category.equals("Insurance")) {
-                    insurance.getAndIncrement();
-                } else if (category.equals("Gifts")) {
-                    gifts.getAndIncrement();
-                } else if (category.equals("Others")) {
-                    others.getAndIncrement();
-                } else if (category.equals("Recive money")) {
-                    recive.getAndIncrement();
-                } else if (category.equals("Transfer money")) {
-                    transfer.getAndIncrement();
-                } else {
-                    totalTransaction.getAndDecrement(); // Invalid or empty category
+                log.info("Category: {}", category);
+                switch (category) {
+                    case "Food" -> food.getAndIncrement();
+                    case "Bill" -> bill.getAndIncrement();
+                    case "Entertain" -> entertain.getAndIncrement();
+                    case "Shopping" -> shopping.getAndIncrement();
+                    case "Investment" -> investment.getAndIncrement();
+                    case "Medicine" -> medicine.getAndIncrement();
+                    case "Education" -> education.getAndIncrement();
+                    case "Travel" -> travel.getAndIncrement();
+                    case "Rent" -> rent.getAndIncrement();
+                    case "Transportation" -> transportation.getAndIncrement();
+                    case "Utilities" -> utilities.getAndIncrement();
+                    case "Savings" -> savings.getAndIncrement();
+                    case "Charity" -> charity.getAndIncrement();
+                    case "Insurance" -> insurance.getAndIncrement();
+                    case "Gifts" -> gifts.getAndIncrement();
+                    case "Others" -> others.getAndIncrement();
+                    case "Recive money" -> recive.getAndIncrement();
+                    case "Transfer money" -> transfer.getAndIncrement();
+                    default -> totalTransaction.getAndDecrement(); // Invalid or empty category
                 }
 
             }
@@ -197,7 +173,7 @@ public class UsageCaculatorService {
 
         // Map transactions
         List<TransactionHistoryResponse> transactionResponses = transactionHistories.stream()
-                .map(this::mapToTransactionResponse)
+                .map(mapper::mapToTransactionResponse)
                 .toList();
 
         log.info("Transaction" + transactionResponses);
@@ -290,4 +266,36 @@ public class UsageCaculatorService {
     }
 
 
+    public ResponseEntity<?> getFutureFund(String userName,String incomes, boolean save) {
+        log.info("userName{}", userName);
+        UserModel userModel = userRepository.findByUserName(userName);
+
+        if(userModel == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Can't find user");
+        }
+        float needs = (float) (Integer.parseInt(incomes) * 55) /100;
+        float saving = (float) (Integer.parseInt(incomes) * 10) /100;
+        float investment = (float) (Integer.parseInt(incomes) * 10) /100;
+        float hobbies = (float) (Integer.parseInt(incomes) * 10) /100;
+        float emergency = (float) (Integer.parseInt(incomes) * 10) /100;
+        float charity = (float) (Integer.parseInt(incomes) * 5) /100;
+
+        MoneyPredict moneyPredict = MoneyPredict.builder()
+                .needs(BigDecimal.valueOf(needs))
+                .savings(BigDecimal.valueOf(saving))
+                .charity(BigDecimal.valueOf(charity))
+                .investment(BigDecimal.valueOf(investment))
+                .emergency(BigDecimal.valueOf(emergency))
+                .hobbies(BigDecimal.valueOf(hobbies))
+                .build();
+
+        if(save){
+            userModel.setMoneyPredict(moneyPredict);
+            userRepository.save(userModel);
+            moneyPredictRepository.save(moneyPredict);
+        }
+
+        return ResponseEntity.ok(moneyPredict);
+
+    }
 }

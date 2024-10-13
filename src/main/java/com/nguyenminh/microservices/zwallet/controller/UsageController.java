@@ -26,4 +26,10 @@ public class UsageController {
     public ResponseEntity<?> getPercentTotal (@RequestBody HashMap<String, String> userName){
         return usageCaculatorService.usageCaculateTotal(userName.get("username"));
     }
+    @PostMapping("/future")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> getFutureFund(@RequestBody HashMap<String, String> income,
+                                           @RequestParam boolean save){
+        return usageCaculatorService.getFutureFund(income.get("userName"),income.get("income"),save);
+    }
 }

@@ -1,5 +1,4 @@
 package com.nguyenminh.microservices.zwallet.service;
-import com.nguyenminh.microservices.zwallet.configuration.AppConfiguration;
 import com.nguyenminh.microservices.zwallet.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +23,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
-
-        log.info("Found user: {}", user);
-        log.info("Password: {}", user.getPassword());
-
         return User.builder()
                 .username(user.getUserName())
                 .password(user.getPassword())
