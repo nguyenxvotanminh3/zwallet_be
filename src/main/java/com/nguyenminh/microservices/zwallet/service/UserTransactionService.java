@@ -16,14 +16,11 @@ public class UserTransactionService {
 
     private final TransactionHistoryRepository transactionHistoryRepository;
     private final UserRepository userRepository;
+    private final ValidateUserService validateUserService;
 
     public UserModel updateTransactionHistory(String name, TransactionHistory transactionHistory){
-
+        validateUserService.checkUserIsAcceptToUserApi(name);
         UserModel userResponse = userRepository.findByUserName(name);
-
-        if(userResponse == null){
-            throw new RuntimeException("Can't find user");
-        }
         List<TransactionHistory> transactionHistoryList = userResponse.getTransactionHistory();
         if (transactionHistoryList == null) {
             transactionHistoryList = new ArrayList<>();

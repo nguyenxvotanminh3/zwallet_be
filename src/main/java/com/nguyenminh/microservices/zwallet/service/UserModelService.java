@@ -5,6 +5,7 @@ import com.nguyenminh.microservices.zwallet.dto.TransactionHistoryResponse;
 import com.nguyenminh.microservices.zwallet.dto.UserRegistrationDto;
 import com.nguyenminh.microservices.zwallet.dto.UserResponse;
 
+import com.nguyenminh.microservices.zwallet.exception.UserNotFoundException;
 import com.nguyenminh.microservices.zwallet.model.TransactionHistory;
 import com.nguyenminh.microservices.zwallet.model.UserModel;
 
@@ -24,26 +25,28 @@ public class UserModelService {
     private final UserRepository userRepository;
     private final Mapper mapper;
     private final EncryptPasswordSerivce encryptPasswordSerivce;
+    private final ValidateUserService validateUserService;
 
     //Get list of user
-    public List<UserResponse> getAllUser() {
-        List<UserModel> userModels = userRepository.findAll();
-        return userModels.stream().map(mapper::mapToUserResponse).toList();
-    }
+//    public List<UserResponse> getAllUser() {
+//        List<UserModel> userModels = userRepository.findAll();
+//        return userModels.stream().map(mapper::mapToUserResponse).toList();
+//    }
 
     //Get user by id
-    public Optional<UserResponse> getUserById(String id) {
-        Optional<UserModel> userModel = userRepository.findById(id);
-        if (userModel.isPresent()) {
-            return userModel.map(mapper::mapToUserResponse);
-        } else {
-            throw new RuntimeException("Cant find user with id: " + id);
-        }
-    }
+//    public Optional<UserResponse> getUserById(String id) {
+//        Optional<UserModel> userModel = userRepository.findById(id);
+//        if (userModel.isPresent()) {
+//            return userModel.map(mapper::mapToUserResponse);
+//        } else {
+//            throw new RuntimeException("Cant find user with id: " + id);
+//        }
+//    }
 
 
     // Update user detail
     public UserResponse updateUserDetail(String name, UserModel userModel2) {
+        validateUserService.checkUserIsAcceptToUserApi(name);
         UserModel userModel = userRepository.findByUserName(name);
 
         if (userModel != null) {
@@ -96,7 +99,6 @@ public class UserModelService {
     @Transactional
     public UserResponse getUserByUserName(String userName) {
         UserModel userModel = userRepository.findByUserName(userName);
-
         if (userModel != null) {
             // Handle the case where transactionHistories might be null
             List<TransactionHistory> transactionHistories = userModel.getTransactionHistory();
@@ -125,8 +127,40 @@ public class UserModelService {
                     .transactionHistoryResponses(transactionHistoryResponses)
                     .build();
         } else {
-            return null;
+            throw new UserNotFoundException("Cant find user with user name : " + userName);
         }
+    }
+
+    public UserResponse getUserByUserName2(String userName) {
+        validateUserService.checkUserIsAcceptToUserApi(userName);
+        UserModel userModel = userRepository.findByUserName(userName);
+            // Handle the case where transactionHistories might be null
+            List<TransactionHistory> transactionHistories = userModel.getTransactionHistory();
+            List<TransactionHistoryResponse> transactionHistoryResponses = (transactionHistories != null)
+                    ? transactionHistories.stream()
+                    .filter(Objects::nonNull) // Bỏ qua các phần tử null
+                    .map(mapper::mapToTransactionResponse)
+                    .toList()
+                    : Collections.emptyList();
+            return UserResponse.builder()
+                    .userId(userModel.getId())
+                    .company(userModel.getCompany())
+                    .password(userModel.getPassword())
+                    .quotes(userModel.getQuotes())
+                    .country(userModel.getCountry())
+                    .postalCode(userModel.getPostalCode())
+                    .userName(userModel.getUserName())
+                    .city(userModel.getCity())
+                    .address(userModel.getAddress())
+                    .aboutMe(userModel.getAboutMe())
+                    .tag(userModel.getTag())
+                    .profileImage(userModel.getProfileImage())
+                    .emailAddress(userModel.getEmailAddress())
+                    .fullName(userModel.getFullName())
+                    .totalAmount(userModel.getTotalAmount())
+                    .transactionHistoryResponses(transactionHistoryResponses)
+                    .build();
+
     }
 
     // delete user by name
@@ -135,13 +169,13 @@ public class UserModelService {
         if (userModel != null) {
             userRepository.deleteById(String.valueOf(Integer.valueOf(userModel.getId())));
             return "Deleted user: " + userName;
-        } else return "Cant find user: " + userName;
+        } else throw new UserNotFoundException("cant find user");
     }
 
     // update Quotes of user
     public UserResponse updateQuotesAndTag(String userName, TagAndQuotesRequest tagAndQuotesRequest) {
+        validateUserService.checkUserIsAcceptToUserApi(userName);
         UserModel userModel = userRepository.findByUserName(userName);
-
         if (userModel != null) {
             userModel.setTag(tagAndQuotesRequest.getTag());
             userModel.setQuotes(tagAndQuotesRequest.getQuotes());

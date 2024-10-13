@@ -31,6 +31,7 @@ public class ErrorService {
         errorRepository.save(error1);
         return ResponseEntity.ok(error1);
     }
+
     public ResponseEntity<?> updateError(String id) {
         Optional<Error> error = errorRepository.findById(id);
         if(error.isEmpty()){

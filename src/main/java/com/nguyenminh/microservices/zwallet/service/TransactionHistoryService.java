@@ -20,16 +20,17 @@ public class TransactionHistoryService {
     private final TransactionHistoryRepository transactionHistoryRepository;
     private final UserTransactionService userTransactionService;
     private final PaginationService paginationService;
-
+    private final ValidateUserService validateUserService;
     private final Mapper mapper;
 
-    public List<TransactionHistoryResponse> getAllTransactionHistory() {
-        List<TransactionHistory> transactionHistory = transactionHistoryRepository.findAll();
-        return transactionHistory.stream().map(mapper::mapToTransactionResponse).toList();
-    }
+//    public List<TransactionHistoryResponse> getAllTransactionHistory() {
+//        List<TransactionHistory> transactionHistory = transactionHistoryRepository.findAll();
+//        return transactionHistory.stream().map(mapper::mapToTransactionResponse).toList();
+//    }
+
 
     public UserResponse createTransactionHistory(String name, TransactionHistory transactionHistory1) {
-
+        validateUserService.checkUserIsAcceptToUserApi(name);
        return mapper.mapToUserResponse(
                userTransactionService.updateTransactionHistory(name,transactionHistory1)
        );
@@ -37,10 +38,8 @@ public class TransactionHistoryService {
 
 
     public PaginatedResponse<TransactionHistoryResponse> getTransactionHistoryPagination(int page, int size, String sort, String userName) throws UnsupportedEncodingException {
-
+        validateUserService.checkUserIsAcceptToUserApi(userName);
         return paginationService.getTransactionHistoryPagination(page,size,sort,userName);
-
-
     }
 
 

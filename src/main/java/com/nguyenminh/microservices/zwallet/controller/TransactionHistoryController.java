@@ -20,11 +20,11 @@ public class TransactionHistoryController {
     @Autowired
     private TransactionHistoryService transactionHistoryService;
 
-    @GetMapping("/all")
-    @ResponseStatus(HttpStatus.OK)
-    public List<TransactionHistoryResponse> getAllTransactionHistory (){
-        return transactionHistoryService.getAllTransactionHistory();
-    }
+//    @GetMapping("/all")
+//    @ResponseStatus(HttpStatus.OK)
+//    public List<TransactionHistoryResponse> getAllTransactionHistory (){
+//        return transactionHistoryService.getAllTransactionHistory();
+//    }
     @GetMapping("/trans")
     @ResponseStatus(HttpStatus.OK)
     public PaginatedResponse<TransactionHistoryResponse> getTransactionHistoryPagination (
