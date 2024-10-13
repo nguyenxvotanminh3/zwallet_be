@@ -1,5 +1,6 @@
 package com.nguyenminh.microservices.zwallet.model;
 
+import com.nguyenminh.microservices.zwallet.dto.MoneyPredict;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -38,6 +39,10 @@ public class UserModel {
 
     @DBRef
     private List<TransactionHistory> transactionHistory = new ArrayList<>();
+
+
+    @DBRef
+    private MoneyPredict moneyPredict;
 
 
 }

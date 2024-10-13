@@ -3,7 +3,10 @@ import com.nguyenminh.microservices.zwallet.dto.TagAndQuotesRequest;
 import com.nguyenminh.microservices.zwallet.dto.UserRegistrationDto;
 import com.nguyenminh.microservices.zwallet.dto.UserResponse;
 import com.nguyenminh.microservices.zwallet.model.UserModel;
+import com.nguyenminh.microservices.zwallet.service.ImageService;
 import com.nguyenminh.microservices.zwallet.service.UserModelService;
+import com.nguyenminh.microservices.zwallet.service.ValidateUserService;
+import com.nguyenminh.microservices.zwallet.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.User;
@@ -30,6 +33,10 @@ import java.nio.file.Paths;
 public class UserController {
 
     private final UserModelService userModelService;
+    private final WalletService walletService;
+    private final ValidateUserService validateUserService;
+    private final ImageService imageService;
+
     @GetMapping("/user/all")
     @ResponseStatus(HttpStatus.OK)
     public List<UserResponse> getAllUser(){
@@ -49,7 +56,7 @@ public class UserController {
     @PutMapping("/user/update-total-amount/{name}")
     @ResponseStatus(HttpStatus.OK)
     public UserResponse updateUserTotal(@PathVariable String name, @RequestBody String totalAmount){
-        return userModelService.updateUserTotal(name,totalAmount);
+        return walletService.updateUserTotal(name,totalAmount);
     }
 
 
@@ -66,7 +73,7 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> checkUsername(@PathVariable String name) {
         log.info("Checking username: " + name);
 
-        boolean exists = userModelService.checkUserName(name);
+        boolean exists = validateUserService.checkUserName(name);
 
         // Prepare the response map
         Map<String, Object> response = new HashMap<>();
@@ -93,7 +100,7 @@ public class UserController {
     @PutMapping("/upload-image/{name}")
     @ResponseStatus(HttpStatus.OK)
     public UserResponse updateUserImage(@PathVariable String name , @RequestParam("image") MultipartFile file){
-        return userModelService.updateUserImage(name,file);
+        return imageService.updateUserImage(name,file);
     }
 
     @PutMapping("/set-tag-quotes/{name}")

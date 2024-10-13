@@ -1,6 +1,10 @@
 package com.nguyenminh.microservices.zwallet.service;
 
 import com.cloudinary.Cloudinary;
+import com.nguyenminh.microservices.zwallet.dto.UserResponse;
+import com.nguyenminh.microservices.zwallet.model.UserModel;
+import com.nguyenminh.microservices.zwallet.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
@@ -10,15 +14,10 @@ import java.io.IOException;
 import java.util.Map;
 
 @Service
-
+@RequiredArgsConstructor
 public class CloudinaryService {
-@Autowired
+
     private final Cloudinary cloudinary;
-
-    public CloudinaryService(Cloudinary cloudinary) {
-        this.cloudinary = cloudinary;
-    }
-
     public String upload(MultipartFile file)  {
         try{
             Map data = this.cloudinary.uploader().upload(file.getBytes(), Map.of());
@@ -27,4 +26,8 @@ public class CloudinaryService {
             throw new RuntimeException("Image upload fail");
         }
     }
+
+
+
+
 }

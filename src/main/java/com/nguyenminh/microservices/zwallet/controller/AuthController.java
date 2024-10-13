@@ -9,8 +9,7 @@ import com.nguyenminh.microservices.zwallet.model.PasswordResetToken;
 import com.nguyenminh.microservices.zwallet.model.UserModel;
 import com.nguyenminh.microservices.zwallet.repository.PasswordResetTokenRepository;
 import com.nguyenminh.microservices.zwallet.repository.UserRepository;
-import com.nguyenminh.microservices.zwallet.service.UserDetailsServiceImpl;
-import com.nguyenminh.microservices.zwallet.service.UserModelService;
+import com.nguyenminh.microservices.zwallet.service.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,24 +42,18 @@ import java.util.stream.Collectors;
 @CrossOrigin("*")
 @Slf4j
 public class AuthController {
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired // Field injection for JwtUtils
-    private JwtUtils jwtUtils;
-    @Autowired
-    private AuthenticationManager authenticationManager;
 
-    @Autowired
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
+    private final AuthenticationManager authenticationManager;
     private final AppConfiguration appConfiguration;
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
-
-    @Autowired
-    private UserModelService userModelService;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PasswordResetTokenRepository passwordResetTokenRepository;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final UserModelService userModelService;
+    private final UserRepository userRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final SecurityService securityService;
+    private final Mapper mapper;
+    private final EncryptPasswordSerivce encryptPasswordSerivce;
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
@@ -117,7 +110,7 @@ public class AuthController {
         headers.add("Access-Control-Allow-Origin", "*");
         log.info(request.get("email"));
         String email = request.get("email");
-        ResponseEntity<?> response = userModelService.forgotPassword(email);
+        ResponseEntity<?> response = securityService.forgotPassword(email);
         return response;
     }
 
@@ -135,14 +128,11 @@ public class AuthController {
 
         // Tìm người dùng từ token
         UserModel user = userRepository.findById(passwordResetToken.getUserId()).orElse(null);
-        UserResponse userResponse = userModelService.mapToUserResponse(user);
+        assert user != null;
+        UserResponse userResponse = mapper.mapToUserResponse(user);
         log.info("found user : " + userResponse);
-        if (user == null) {
-            return ResponseEntity.badRequest().body("User not found");
-        }
         log.info("raw pass : " + pass);
-        // Cập nhật mật khẩu mới và mã hóa mật khẩu
-        user.setPassword(appConfiguration.passwordEncoder().encode(pass.get("newpass")));
+        user.setPassword(encryptPasswordSerivce.encryptPassword(pass.get("newpass")));
         log.info("change password " + user.getPassword());
         userRepository.save(user);
 
@@ -151,12 +141,15 @@ public class AuthController {
 
         return ResponseEntity.ok("Password successfully reset");
     }
+
+
+
     @PutMapping("/user/change-pass")
     public ResponseEntity<?> changPassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
         try {
             UserDetails userDetails = userDetailsService.loadUserByUsername(changePasswordRequest.getUserName());
             if (passwordEncoder.matches(changePasswordRequest.getOldPass(), userDetails.getPassword())) {
-                return userModelService.ChangePassword(changePasswordRequest.getUserName(),changePasswordRequest.getNewPass());
+                return securityService.ChangePassword(changePasswordRequest.getUserName(),changePasswordRequest.getNewPass());
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Password not match");
             }

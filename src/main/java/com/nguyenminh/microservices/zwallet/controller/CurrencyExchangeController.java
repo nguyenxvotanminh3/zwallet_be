@@ -3,7 +3,9 @@ package com.nguyenminh.microservices.zwallet.controller;
 import com.nguyenminh.microservices.zwallet.dto.CurrencyCaculate;
 import com.nguyenminh.microservices.zwallet.dto.CurrencyExchangeRequest;
 import com.nguyenminh.microservices.zwallet.model.CurrencyExchange;
+import com.nguyenminh.microservices.zwallet.service.CurrencyConversionService;
 import com.nguyenminh.microservices.zwallet.service.CurrencyExchangeService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +16,12 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/v1/currency-exchange")
 @CrossOrigin("*")
+@RequiredArgsConstructor
 public class CurrencyExchangeController {
 
-    @Autowired
-    private CurrencyExchangeService service;
+
+    private final CurrencyExchangeService service;
+    private final CurrencyConversionService currencyCalculate;
 
     // Create a new currency exchange
     @PostMapping
@@ -58,8 +62,8 @@ public class CurrencyExchangeController {
         return ResponseEntity.noContent().build();
     }
     @PostMapping("/hehe")
-    public ResponseEntity<?> currencyCaculate(@RequestBody CurrencyExchangeRequest currencyExchangeRequest) {
-       return service.currencyCaculate(currencyExchangeRequest);
+    public ResponseEntity<?> currencyCalculate(@RequestBody CurrencyExchangeRequest currencyExchangeRequest) {
+       return currencyCalculate.currencyCalculate(currencyExchangeRequest);
     }
 
 }

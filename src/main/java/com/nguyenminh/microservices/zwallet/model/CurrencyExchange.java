@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 @Document(value = "currency_exchange")
 public class CurrencyExchange {
     private String id;
-    private String currency_from;
-    private String currency_to ;
+    private String currencyFrom;
+    private String currencyTo ;
     private BigDecimal conversionMultiple;
 }
