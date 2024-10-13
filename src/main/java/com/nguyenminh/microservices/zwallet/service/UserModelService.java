@@ -1,28 +1,20 @@
 package com.nguyenminh.microservices.zwallet.service;
 
-import com.nguyenminh.microservices.zwallet.configuration.AppConfiguration;
 import com.nguyenminh.microservices.zwallet.dto.TagAndQuotesRequest;
 import com.nguyenminh.microservices.zwallet.dto.TransactionHistoryResponse;
 import com.nguyenminh.microservices.zwallet.dto.UserRegistrationDto;
 import com.nguyenminh.microservices.zwallet.dto.UserResponse;
-import com.nguyenminh.microservices.zwallet.model.PasswordResetToken;
+
 import com.nguyenminh.microservices.zwallet.model.TransactionHistory;
 import com.nguyenminh.microservices.zwallet.model.UserModel;
-import com.nguyenminh.microservices.zwallet.repository.PasswordResetTokenRepository;
+
 import com.nguyenminh.microservices.zwallet.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
+
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.SecureRandom;
-import java.time.LocalDateTime;
+
 import java.util.*;
 
 @RequiredArgsConstructor

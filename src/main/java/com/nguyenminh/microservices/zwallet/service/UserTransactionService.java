@@ -1,7 +1,5 @@
 package com.nguyenminh.microservices.zwallet.service;
 
-import com.nguyenminh.microservices.zwallet.dto.TransactionHistoryResponse;
-import com.nguyenminh.microservices.zwallet.dto.UserResponse;
 import com.nguyenminh.microservices.zwallet.model.TransactionHistory;
 import com.nguyenminh.microservices.zwallet.model.UserModel;
 import com.nguyenminh.microservices.zwallet.repository.TransactionHistoryRepository;
@@ -16,7 +14,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserTransactionService {
 
-    private final UserModelService userModelService;
     private final TransactionHistoryRepository transactionHistoryRepository;
     private final UserRepository userRepository;
 
