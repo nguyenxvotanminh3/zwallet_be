@@ -23,10 +23,6 @@ public class TransactionHistoryService {
     private final ValidateUserService validateUserService;
     private final Mapper mapper;
 
-//    public List<TransactionHistoryResponse> getAllTransactionHistory() {
-//        List<TransactionHistory> transactionHistory = transactionHistoryRepository.findAll();
-//        return transactionHistory.stream().map(mapper::mapToTransactionResponse).toList();
-//    }
 
 
     public UserResponse createTransactionHistory(String name, TransactionHistory transactionHistory1) {
